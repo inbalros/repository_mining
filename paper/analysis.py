@@ -1,22 +1,16 @@
 import logging
+import os
+from abc import ABC, abstractmethod
 from multiprocessing import Pool
 
 import numpy as np
-import os
 import pandas as pd
-from abc import ABC, abstractmethod
 from imblearn.over_sampling import SMOTE
 from sklearn import preprocessing
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_selection import SelectPercentile, chi2, mutual_info_classif, f_classif, SelectFromModel, RFECV
-from sklearn.linear_model import LogisticRegression
+from sklearn.feature_selection import SelectPercentile, chi2, f_classif, RFECV, mutual_info_classif
 from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, brier_score_loss
-from sklearn.naive_bayes import BernoulliNB
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.neural_network import MLPClassifier
-from sklearn.svm import SVC, LinearSVC
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import SVC
 
 from config import Config
 from paper.builders import Builders
@@ -25,30 +19,32 @@ from projects import ProjectName
 
 
 class Analysis(ABC):
-    models = {
-        'LinearDiscriminantAnalysis': LinearDiscriminantAnalysis(),
-        'QuadraticDiscriminantAnalysis': QuadraticDiscriminantAnalysis(),
-        'LogisticRegression': LogisticRegression(),
-        'BernoulliNaiveBayes': BernoulliNB(),
-        'K-NearestNeighbor': KNeighborsClassifier(),
-        'DecisionTree': DecisionTreeClassifier(),
-        'RandomForest': RandomForestClassifier(),
-        'SupportVectorMachine': SVC(),
-        'MultilayerPerceptron': MLPClassifier()
-    }
+    # models = {
+    #     'LinearDiscriminantAnalysis': LinearDiscriminantAnalysis(),
+    #     'QuadraticDiscriminantAnalysis': QuadraticDiscriminantAnalysis(),
+    #     'LogisticRegression': LogisticRegression(),
+    #     'BernoulliNaiveBayes': BernoulliNB(),
+    #     'K-NearestNeighbor': KNeighborsClassifier(),
+    #     'DecisionTree': DecisionTreeClassifier(),
+    #     'RandomForest': RandomForestClassifier(),
+    #     'SupportVectorMachine': SVC(),
+    #     'MultilayerPerceptron': MLPClassifier()
+    # }
+    models = {'SupportVectorMachine': SVC()}
 
-    params = {
-        'LinearDiscriminantAnalysis': {},
-        'QuadraticDiscriminantAnalysis': {},
-        'LogisticRegression': {'C': list(np.logspace(-4, 4, 3))},
-        'BernoulliNaiveBayes': {},
-        'K-NearestNeighbor': {},
-        'DecisionTree': {'criterion': ['gini', 'entropy'], },
-        'RandomForest': {'n_estimators': [10, 100]},
-        'SupportVectorMachine': {'C': [0.1, 100]},
-        'MultilayerPerceptron': {'hidden_layer_sizes': [(17, 8, 17)],
-                                 'activation': ['tanh', 'relu']}
-    }
+    # params = {
+    #     'LinearDiscriminantAnalysis': {},
+    #     'QuadraticDiscriminantAnalysis': {},
+    #     'LogisticRegression': {'C': list(np.logspace(-4, 4, 3))},
+    #     'BernoulliNaiveBayes': {},
+    #     'K-NearestNeighbor': {},
+    #     'DecisionTree': {'criterion': ['gini', 'entropy'], },
+    #     'RandomForest': {'n_estimators': [10, 100]},
+    #     'SupportVectorMachine': {'C': [0.1, 100]},
+    #     'MultilayerPerceptron': {'hidden_layer_sizes': [(17, 8, 17)],
+    #                              'activation': ['tanh', 'relu']}
+    # }
+    params = {'SupportVectorMachine': {'C': [0.1, 100]}}
 
     selection_methods = {
         'chi2_20p': SelectPercentile(chi2, percentile=20),
@@ -59,6 +55,7 @@ class Analysis(ABC):
         'f_classif_50': SelectPercentile(f_classif, percentile=50),
         'recursive_elimination': RFECV(RandomForestClassifier(), min_features_to_select=3, step=1, cv=5, scoring='f1')
     }
+    # selection_methods = {}
 
     def __init__(self, log_name, project: ProjectName, metric: str):
         self.logs = Logs(log_name)
@@ -66,7 +63,7 @@ class Analysis(ABC):
         self.project_name = project.github()
         self.metric = metric
         self.versions = self._get_versions()
-        self.caching = Caching(self.project_name, self.metric)
+        self.caching = Caching(self.project_name, self.metric, log_name)
 
     def _get_versions(self):
         self.logs.general("{0} | {1} | 1/11 | Getting Versions ...".format(self.metric, self.project_name))
@@ -119,7 +116,8 @@ class Analysis(ABC):
         training_df = pd.concat(datasets[:-1], ignore_index=True).drop(["File", "Class"], axis=1)
         testing_df = datasets[-1].drop(["File", "Class"], axis=1)
         self.caching.store_datasets(training_df, testing_df)
-        self.logs.success("{0} | {1} | 3/11 | Splitted training and testing datasets.".format(self.metric, self.project_name))
+        self.logs.success(
+            "{0} | {1} | 3/11 | Splitted training and testing datasets.".format(self.metric, self.project_name))
         return training_df, testing_df
 
     class FailedSplit(Exception):
@@ -157,6 +155,7 @@ class Analysis(ABC):
             helper = EstimatorSelectionHelper(self.models, self.params)
             helper.fit(X, y)
             return helper.score_summary()
+
         self.logs.general("{0} | {1} | 7/11 | Tuning models and parameters ...".format(self.metric, self.project_name))
         summaries = {method: get_summary(data[0], data[1])
                      for method, data in oversample_datasets.items()}
@@ -216,12 +215,12 @@ class Analysis(ABC):
         self.logs.general("{0} | {1} | 11/11 | Calculate Scores ...".format(self.metric, self.project_name))
         method_names = configurations.keys()
         scores_dicts = list(map(lambda method_name:
-                          list(map(lambda configuration:
-                                   calculate_score(method_name,
-                                                   oversampled_training[method_name],
-                                                   selected_testing[method_name],
-                                                   configuration),
-                                   configurations[method_name])), method_names))
+                                list(map(lambda configuration:
+                                         calculate_score(method_name,
+                                                         oversampled_training[method_name],
+                                                         selected_testing[method_name],
+                                                         configuration),
+                                         configurations[method_name])), method_names))
         scores_df = [pd.DataFrame(score) for score in scores_dicts]
         scores = pd.concat(scores_df)
         self.caching.store_scores(scores)
@@ -243,6 +242,7 @@ class Designite(Analysis):
             if classes_df.empty:
                 raise Analysis.FailedBuildDataset("Designite Smells dataset is empty.")
             return classes_df
+
         super().build_datasets(versions)
         datasets = list(map(build_dataset, versions))
         self.logs.success("{0} | {1} | 2/11 | Built Datasets.".format(self.metric, self.project_name))
@@ -310,7 +310,7 @@ class Traditional(Analysis):
 
             classes_df.dropna(inplace=True)
             values = {feature: 0 for feature in list(methods_df.columns)}
-            values.update(dict(zip(('File', 'Class', 'Method'), ['nan']*3)))
+            values.update(dict(zip(('File', 'Class', 'Method'), ['nan'] * 3)))
             methods_df.fillna(value=values, inplace=True)
             methods_df.dropna(inplace=True)
             aggregation_fns = {feature: mean_or_union for feature in list(methods_df.columns)[3:]}
@@ -319,6 +319,7 @@ class Traditional(Analysis):
             dataset.dropna(subset=['Bugged'], inplace=True)
             dataset.fillna(0, inplace=True)
             return dataset
+
         super().build_datasets(versions)
         datasets = list(map(build_dataset, versions))
         self.logs.success("{0} | {1} | 2/11 | Built Datasets.".format(self.metric, self.project_name))
@@ -331,15 +332,43 @@ class Traditional(Analysis):
             dataset = pd.DataFrame(X, columns=dataset.drop("Bugged", axis=1).columns)
             dataset.insert(len(dataset.columns), "Bugged", y.to_list())
             return dataset
+
         training_df = scale(training_df.dropna().astype(int))
         testing_df = scale(testing_df.dropna().astype(int))
         self.logs.success("{0} | {1} | 4/11 | Handling missing values.".format(self.metric, self.project_name))
         return training_df, testing_df
 
 
-class DesigniteFowler(Analysis):
-    def __init__(self, log_name: str, project: ProjectName):
-        super().__init__(log_name, project, "designite_fowler")
+class SimpleAnalysis(Analysis):
+    def __init__(self, log_name: str, project: ProjectName, analysis_name: str, builder):
+        super().__init__(log_name, project, analysis_name)
+        self.builder = builder
+
+    def build_datasets(self, versions):
+        def build_dataset(version):
+            db = self.builder(self.project, version)
+            classes_df, methods_df = db.build()
+            if classes_df.empty:
+                raise Analysis.FailedBuildDataset("Designite Encapsulation Smells dataset is empty.")
+            return classes_df
+
+        super().build_datasets(versions)
+        datasets = list(map(build_dataset, versions))
+        self.logs.success("{0} | {1} | 2/11 | Built Datasets.".format(self.metric, self.project_name))
+        return datasets
+
+    def handle_missing_values(self, training_df, testing_df):
+        super().handle_missing_values(training_df, testing_df)
+        training_df = training_df.dropna().astype(int)
+        testing_df = testing_df.dropna().astype(int)
+        self.logs.success("{0} | {1} | 4/11 | Handling missing values.".format(self.metric, self.project_name))
+        return training_df, testing_df
+
+
+class BooleanAnalysis(Analysis):
+    def __init__(self, log_name: str, project: ProjectName, analysis_name: str, builder):
+        super().__init__(log_name, project, analysis_name)
+        self.builder = builder
 
     def build_datasets(self, versions):
         def build_dataset(version):
@@ -370,6 +399,140 @@ class DesigniteFowler(Analysis):
         return training_df, testing_df
 
 
+class DesigniteMinusFowler(SimpleAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_minus_fowler", Builders.get_designite_minus_fowler)
+
+
+class DesigniteAndFowlerMinusFowler(BooleanAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_and_fowler_minus_fowler",
+                         Builders.get_designite_and_fowler_minus_fowler)
+
+
+class DesigniteAndFowlerMinusDesignite(BooleanAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_and_fowler_minus_designite",
+                         Builders.get_designite_and_fowler_minus_designite)
+
+
+class DesigniteFowler(BooleanAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_fowler", Builders.get_designite_fowler_builder)
+
+
+class DesigniteAbstraction(SimpleAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_abstraction", Builders.get_designite_abstraction_builder)
+
+
+class DesigniteEncapsulation(SimpleAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_encapsulation", Builders.get_designite_encapsulation_builder)
+
+
+class DesigniteHierarchy(SimpleAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_hierarchy", Builders.get_designite_hierarchy_builder)
+
+
+class DesigniteModularization(SimpleAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_modularization", Builders.get_designite_modularization_builder)
+
+
+class FowlerAbstraction(SimpleAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "fowler_abstraction", Builders.get_fowler_abstraction_builder)
+
+
+class FowlerEncapsulation(SimpleAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "fowler_encapsulation", Builders.get_fowler_encapsulation_builder)
+
+
+class FowlerHierarchy(SimpleAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "fowler_hierarchy", Builders.get_fowler_hierarchy_builder)
+
+
+class FowlerModularization(SimpleAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "fowler_modularization", Builders.get_fowler_modularization_builder)
+
+
+class DesigniteFowlerAbstraction(BooleanAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_fowler_abstraction",
+                         Builders.get_designite_fowler_abstraction_builder)
+
+
+class DesigniteFowlerModularization(BooleanAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_fowler_modularization",
+                         Builders.get_designite_fowler_abstraction_builder)
+
+
+class DesigniteFowlerEncapsulation(BooleanAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_fowler_encapsulation",
+                         Builders.get_designite_fowler_abstraction_builder)
+
+
+class DesigniteFowlerHierarchy(BooleanAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_fowler_hierarchy",
+                         Builders.get_designite_fowler_abstraction_builder)
+
+
+class DesigniteFowlerSizeAndComplexity(BooleanAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_fowler_size_and_complexity",
+                         Builders.get_designite_fowler_size_and_complexity_builder)
+
+
+class DesigniteFowlerCoupling(BooleanAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_fowler_coupling", Builders.get_designite_fowler_coupling_builder)
+
+
+class DesigniteFowlerInheritance(BooleanAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_fowler_inheritance", Builders.get_designite_fowler_inheritance_builder)
+
+
+class FowlerSizeAndComplexity(BooleanAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "fowler_size_and_complexity",
+                         Builders.get_fowler_size_and_complexity_builder)
+
+
+class FowlerCoupling(BooleanAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "fowler_coupling", Builders.get_fowler_coupling_builder)
+
+
+class FowlerInheritance(BooleanAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "fowler_inheritance", Builders.get_fowler_inheritance_builder)
+
+
+class DesigniteSizeAndComplexity(BooleanAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_size_and_complexity",
+                         Builders.get_designite_size_and_complexity_builder)
+
+
+class DesigniteCoupling(BooleanAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_coupling", Builders.get_designite_coupling_builder)
+
+
+class DesigniteInheritance(BooleanAnalysis):
+    def __init__(self, log_name: str, project: ProjectName):
+        super().__init__(log_name, project, "designite_inheritance", Builders.get_designite_inheritance_builder)
+
+
 class DesigniteTraditional(Analysis):
     def __init__(self, log_name: str, project: ProjectName):
         super().__init__(log_name, project, "designite_traditional")
@@ -390,7 +553,7 @@ class DesigniteTraditional(Analysis):
 
             classes_df.dropna(inplace=True)
             values = {feature: 0 for feature in list(methods_df.columns)}
-            values.update(dict(zip(('File', 'Class', 'Method'), ['nan']*3)))
+            values.update(dict(zip(('File', 'Class', 'Method'), ['nan'] * 3)))
             methods_df.fillna(value=values, inplace=True)
             methods_df.dropna(inplace=True)
             aggregation_fns = {feature: mean_or_union for feature in list(methods_df.columns)[3:]}
@@ -399,6 +562,7 @@ class DesigniteTraditional(Analysis):
             dataset.dropna(subset=['Bugged'], inplace=True)
             dataset.fillna(0, inplace=True)
             return dataset
+
         super().build_datasets(versions)
         datasets = list(map(build_dataset, versions))
         self.logs.success("{0} | {1} | 2/11 | Built Datasets.".format(self.metric, self.project_name))
@@ -411,6 +575,7 @@ class DesigniteTraditional(Analysis):
             dataset = pd.DataFrame(X, columns=dataset.drop("Bugged", axis=1).columns)
             dataset.insert(len(dataset.columns), "Bugged", y.to_list())
             return dataset
+
         training_df = scale(training_df.dropna().astype(int))
         testing_df = scale(testing_df.dropna().astype(int))
         self.logs.success("{0} | {1} | 4/11 | Handling missing values.".format(self.metric, self.project_name))
@@ -419,7 +584,7 @@ class DesigniteTraditional(Analysis):
 
 class FowlerTraditional(Analysis):
     def __init__(self, log_name: str, project: ProjectName):
-       super().__init__(log_name, project, "fowler_traditional")
+        super().__init__(log_name, project, "fowler_traditional")
 
     def build_datasets(self, versions):
         def build_dataset(version):
@@ -440,7 +605,7 @@ class FowlerTraditional(Analysis):
             # file-class conversion leaves rows without values(nan) - drop them
             classes_df.dropna(inplace=True)
             values = {feature: 0 for feature in list(methods_df.columns)}
-            values.update(dict(zip(('File', 'Class', 'Method'), ['nan']*3)))
+            values.update(dict(zip(('File', 'Class', 'Method'), ['nan'] * 3)))
             methods_df.fillna(value=values, inplace=True)
             methods_df.dropna(inplace=True)
             aggregation_fns = {feature: mean_or_union for feature in list(methods_df.columns)[3:]}
@@ -461,6 +626,7 @@ class FowlerTraditional(Analysis):
             dataset = pd.DataFrame(X, columns=dataset.drop("Bugged", axis=1).columns)
             dataset.insert(len(dataset.columns), "Bugged", y.to_list())
             return dataset
+
         training_df = scale(training_df.dropna().astype(int))
         testing_df = scale(testing_df.dropna().astype(int))
         self.logs.success("{0} | {1} | 4/11 | Handling missing values.".format(self.metric, self.project_name))
@@ -511,6 +677,7 @@ class DesigniteFowlerTraditional(Analysis):
             dataset = pd.DataFrame(X, columns=dataset.drop("Bugged", axis=1).columns)
             dataset.insert(len(dataset.columns), "Bugged", y.to_list())
             return dataset
+
         training_df = scale(training_df.dropna().astype(int))
         testing_df = scale(testing_df.dropna().astype(int))
         self.logs.success("{0} | {1} | 4/11 | Handling missing values.".format(self.metric, self.project_name))
@@ -518,8 +685,8 @@ class DesigniteFowlerTraditional(Analysis):
 
 
 class Caching:
-    def __init__(self, project_name, metric):
-        self.base = Config.get_work_dir_path(os.path.join("paper", "analysis"))
+    def __init__(self, project_name, metric, base):
+        self.base = Config.get_work_dir_path(os.path.join("paper", base))
         Config.assert_dir_exists(self.base)
         self.project_name = project_name
         self.metric = metric
@@ -672,43 +839,41 @@ class Logs:
 
 
 def run(project):
-    log_name = "analysis"
+    log_name = "svm_fs_analysis"
     # Designite(log_name, project).analyse()
-    Fowler(log_name, project).analyse()
+    # Fowler(log_name, project).analyse()
     DesigniteFowler(log_name, project).analyse()
-    Traditional(log_name, project).analyse()
-    DesigniteTraditional(log_name, project).analyse()
+    # DesigniteMinusFowler(log_name, project).analyse()
+    # DesigniteAndFowlerMinusFowler(log_name, project).analyse()
+    # DesigniteAndFowlerMinusDesignite(log_name, project).analyse()
+    # Traditional(log_name, project).analyse()
+    # DesigniteTraditional(log_name, project).analyse()
     # FowlerTraditional(log_name, project).analyse()
     # DesigniteFowlerTraditional(log_name, project).analyse()
+    # DesigniteAbstraction(log_name, project).analyse()
+    # DesigniteEncapsulation(log_name, project).analyse()
+    # DesigniteHierarchy(log_name, project).analyse()
+    # DesigniteModularization(log_name, project).analyse()
+    # FowlerAbstraction(log_name, project).analyse()
+    # FowlerEncapsulation(log_name, project).analyse()
+    # FowlerHierarchy(log_name, project).analyse()
+    # FowlerModularization(log_name, project).analyse()
+    # DesigniteFowlerAbstraction(log_name, project).analyse()
+    # DesigniteFowlerEncapsulation(log_name, project).analyse()
+    # DesigniteFowlerHierarchy(log_name, project).analyse()
+    # DesigniteFowlerModularization(log_name, project).analyse()
+    # DesigniteFowlerSizeAndComplexity(log_name, project).analyse()
+    # DesigniteFowlerCoupling(log_name, project).analyse()
+    # DesigniteFowlerInheritance(log_name, project).analyse()
+    # FowlerSizeAndComplexity(log_name, project).analyse()
+    # FowlerCoupling(log_name, project).analyse()
+    # FowlerInheritance(log_name, project).analyse()
+    # DesigniteSizeAndComplexity(log_name, project).analyse()
+    # DesigniteCoupling(log_name, project).analyse()
+    # DesigniteInheritance(log_name, project).analyse()
 
 
 if __name__ == "__main__":
     projects = list(ProjectName)
-    # projects = [
-    #     ProjectName.Camel,
-        # ProjectName.CommonsBeanUtils,
-        # ProjectName.Drill,
-        # ProjectName.FOP,
-        # ProjectName.Continuum,
-        # ProjectName.OpenJPA,
-        # ProjectName.Jackrabbit,
-        # ProjectName.Tapestry5,
-        # ProjectName.CommonsJexl,
-        # ProjectName.CXF,
-        # ProjectName.Shiro,
-        # ProjectName.Reef,
-        # ProjectName.Olingo,
-        # ProjectName.Accumulo,
-        # ProjectName.Cocoon,
-        # ProjectName.Cayenne,
-        # ProjectName.Kafka,
-        # ProjectName.CarbonData,
-        # ProjectName.Giraph,
-        # ProjectName.Isis,
-        # ProjectName.Wicket,
-        # ProjectName.Beam,
-        # ProjectName.TinkerPop
-    # ]
     with Pool() as p:
-       p.map(run, projects)
-
+        p.map(run, projects)

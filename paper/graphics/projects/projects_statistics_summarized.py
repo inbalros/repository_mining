@@ -3,9 +3,8 @@
     age
     number contributors
     number files
-    {v1...v5}
-    number defects
-    {v1...v5}
+    ratio of defects
+    number of commits
 
 Project | Age (months) | Number Contributors |      Number Files      |      Number Defects
                                              | v1 | v2 | v3 | v4 | v5 | v1 | v2 | v3 | v4 | v5
@@ -24,6 +23,7 @@ import os
 from itertools import product
 
 import pandas as pd
+import numpy as np
 
 from config import Config
 
@@ -71,11 +71,11 @@ num_contributors_2 = split2(num_contributors)
 
 index_1 = pd.MultiIndex.from_arrays([projects_1, duration_1, num_contributors_1],
                                     names=['Project', 'Age(Mth)', '#Cntrb'])
-columns_1 = pd.MultiIndex.from_product([['#Files', '#Defects', '%Defects'], ['v1', 'v2', 'v3', 'v4', 'v5']],
+columns_1 = pd.MultiIndex.from_product([['AVG#Files', '#Commits', '%Defects'], ['training', 'testing']],
                                        names=['', 'Versions'])
 index_2 = pd.MultiIndex.from_arrays([projects_2, duration_2, num_contributors_2],
                                     names=['Project', 'Age(Mth)', '#Cntrb'])
-columns_2 = pd.MultiIndex.from_product([['#Files', '#Defects', '%Defects'], ['v1', 'v2', 'v3', 'v4', 'v5']],
+columns_2 = pd.MultiIndex.from_product([['AVG#Files', '#Commits', '%Defects'], ['training', 'testing']],
                                        names=['', 'Versions'])
 
 data = []
@@ -91,14 +91,29 @@ for project in projects:
     versions_info_df = pd.read_csv(versions_info_path)
     data.append([(versions_info_df.loc[versions_info_df['version_name'] == version][
                       '#commited_files_in_version'].values[0],
-                  versions_info_df.loc[versions_info_df['version_name'] == version]['#bugged_files_in_version'].values[
+                  versions_info_df.loc[versions_info_df['version_name'] == version]['#commits'].values[
                       0],
                   str(round(float(
                       versions_info_df.loc[versions_info_df['version_name'] == version]['bugged_ratio'].values[
                           0]) * 100, 1)),
                   ) for version in versions])
 
+data = list(map(lambda x:[
+        (
+            int(np.mean(list(map(lambda y: y[0], x[:4])))),
+            int(np.mean(list(map(lambda y: y[1], x[:4])))),
+            round(float((np.mean(list(map(lambda y: float(y[2]), x[:4]))))), 2)
+        ),
+        (
+            x[4][0],
+            x[4][1],
+            round(float(x[4][2]), 2)
+        )
+    ]
+         , data))
+
 data1 = transpose(split1(data))
 data2 = transpose(split2(data))
-pd.DataFrame(data1, columns=columns_1, index=index_1).to_latex("projects1.tex")
-pd.DataFrame(data2, columns=columns_2, index=index_2).to_latex("projects2.tex")
+pd.DataFrame(data1, columns=columns_1, index=index_1).to_latex("table1.tex", multirow=True)
+print(pd.DataFrame(data1, columns=columns_1, index=index_1))
+pd.DataFrame(data2, columns=columns_2, index=index_2).to_latex("table2.tex", multirow=True)

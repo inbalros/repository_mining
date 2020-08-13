@@ -53,6 +53,98 @@ class Builders:
         return db
 
     @staticmethod
+    def get_designite_and_fowler_minus_fowler(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.ImperativeAbstraction)
+        db.append(DataName.DeficientEncapsulation)
+        db.append(DataName.UnexploitedEncapsulation)
+        db.append(DataName.Cyclic_DependentModularization)
+        db.append(DataName.Hub_likeModularization)
+        db.append(DataName.BrokenHierarchy)
+        db.append(DataName.CyclicHierarchy)
+        db.append(DataName.DeepHierarchy)
+        db.append(DataName.MissingHierarchy)
+        db.append(DataName.MultipathHierarchy)
+        db.append(DataName.WideHierarchy)
+        db.append(DataName.GodClass)
+        db.append(DataName.ClassDataShouldBePrivate)
+        db.append(DataName.ComplexClass)
+        db.append(DataName.LazyClass)
+        db.append(DataName.RefusedBequest)
+        db.append(DataName.SpaghettiCode)
+        db.append(DataName.SpeculativeGenerality)
+        db.append(DataName.DataClass)
+        db.append(DataName.BrainClass)
+        db.append(DataName.LargeClass)
+        db.append(DataName.SwissArmyKnife)
+        db.append(DataName.AntiSingleton)
+        db.append(DataName.FeatureEnvy)
+        db.append(DataName.LongMethod_Organic)
+        db.append(DataName.LongParameterList_Organic)
+        db.append(DataName.MessageChain)
+        db.append(DataName.DispersedCoupling)
+        db.append(DataName.IntensiveCoupling)
+        db.append(DataName.ShotgunSurgery)
+        db.append(DataName.BrainMethod)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_designite_and_fowler_minus_designite(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.ImperativeAbstraction)
+        db.append(DataName.MultifacetedAbstraction)
+        db.append(DataName.UnnecessaryAbstraction)
+        db.append(DataName.UnutilizedAbstraction)
+        db.append(DataName.DeficientEncapsulation)
+        db.append(DataName.UnexploitedEncapsulation)
+        db.append(DataName.BrokenModularization)
+        db.append(DataName.Cyclic_DependentModularization)
+        db.append(DataName.InsufficientModularization)
+        db.append(DataName.Hub_likeModularization)
+        db.append(DataName.BrokenHierarchy)
+        db.append(DataName.CyclicHierarchy)
+        db.append(DataName.DeepHierarchy)
+        db.append(DataName.MissingHierarchy)
+        db.append(DataName.MultipathHierarchy)
+        db.append(DataName.RebelliousHierarchy)
+        db.append(DataName.WideHierarchy)
+        db.append(DataName.ClassDataShouldBePrivate)
+        db.append(DataName.ComplexClass)
+        db.append(DataName.SpaghettiCode)
+        db.append(DataName.BrainClass)
+        db.append(DataName.SwissArmyKnife)
+        db.append(DataName.AntiSingleton)
+        db.append(DataName.LongMethod_Organic)
+        db.append(DataName.LongParameterList_Organic)
+        db.append(DataName.MessageChain)
+        db.append(DataName.DispersedCoupling)
+        db.append(DataName.IntensiveCoupling)
+        db.append(DataName.ShotgunSurgery)
+        db.append(DataName.BrainMethod)
+        db.append(DataName.Bugged)
+        return db
+
+
+    @staticmethod
+    def get_designite_minus_fowler(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.ImperativeAbstraction)
+        db.append(DataName.DeficientEncapsulation)
+        db.append(DataName.UnexploitedEncapsulation)
+        db.append(DataName.Cyclic_DependentModularization)
+        db.append(DataName.InsufficientModularization)
+        db.append(DataName.Hub_likeModularization)
+        db.append(DataName.BrokenHierarchy)
+        db.append(DataName.CyclicHierarchy)
+        db.append(DataName.DeepHierarchy)
+        db.append(DataName.MissingHierarchy)
+        db.append(DataName.MultipathHierarchy)
+        db.append(DataName.WideHierarchy)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
     def get_traditional_builder(project, version):
         db = DataBuilder(project, version)
         db.append(DataName.CBO)
@@ -414,5 +506,280 @@ class Builders:
         db.append(DataName.NumberOfPublicMethods_Checkstyle)
         db.append(DataName.ClassFanOutComplexity)
         db.append(DataName.ClassDataAbstractionCoupling)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_designite_abstraction_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.ImperativeAbstraction)
+        db.append(DataName.MultifacetedAbstraction)
+        db.append(DataName.UnnecessaryAbstraction)
+        db.append(DataName.UnutilizedAbstraction)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_designite_encapsulation_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.DeficientEncapsulation)
+        db.append(DataName.UnexploitedEncapsulation)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_designite_hierarchy_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.MissingHierarchy)
+        db.append(DataName.WideHierarchy)
+        db.append(DataName.DeepHierarchy)
+        db.append(DataName.RebelliousHierarchy)
+        db.append(DataName.BrokenHierarchy)
+        db.append(DataName.MultipathHierarchy)
+        db.append(DataName.CyclicHierarchy)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_designite_modularization_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.BrokenModularization)
+        db.append(DataName.InsufficientModularization)
+        db.append(DataName.Cyclic_DependentModularization)
+        db.append(DataName.Hub_likeModularization)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_fowler_abstraction_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.ComplexClass)
+        db.append(DataName.LazyClass)
+        db.append(DataName.SpeculativeGenerality)
+        db.append(DataName.LargeClass)
+        db.append(DataName.SwissArmyKnife)
+        db.append(DataName.LongMethod_Organic)
+        db.append(DataName.LongParameterList_Organic)
+        db.append(DataName.ShotgunSurgery)
+        db.append(DataName.SpaghettiCode)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_fowler_encapsulation_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.ClassDataShouldBePrivate)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_fowler_hierarchy_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.RefusedBequest)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_fowler_modularization_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.GodClass)
+        db.append(DataName.DataClass)
+        db.append(DataName.BrainClass)
+        db.append(DataName.AntiSingleton)
+        db.append(DataName.FeatureEnvy)
+        db.append(DataName.MessageChain)
+        db.append(DataName.DispersedCoupling)
+        db.append(DataName.IntensiveCoupling)
+        db.append(DataName.BrainMethod)
+        db.append(DataName.Bugged)
+        return db
+
+
+    @staticmethod
+    def get_designite_fowler_abstraction_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.ImperativeAbstraction)
+        db.append(DataName.MultifacetedAbstraction)
+        db.append(DataName.UnnecessaryAbstraction)
+        db.append(DataName.UnutilizedAbstraction)
+        db.append(DataName.ComplexClass)
+        db.append(DataName.LazyClass)
+        db.append(DataName.SpeculativeGenerality)
+        db.append(DataName.LargeClass)
+        db.append(DataName.SwissArmyKnife)
+        db.append(DataName.LongMethod_Organic)
+        db.append(DataName.LongParameterList_Organic)
+        db.append(DataName.ShotgunSurgery)
+        db.append(DataName.SpaghettiCode)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_designite_fowler_encapsulation_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.DeficientEncapsulation)
+        db.append(DataName.UnexploitedEncapsulation)
+        db.append(DataName.ClassDataShouldBePrivate)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_designite_fowler_hierarchy_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.MissingHierarchy)
+        db.append(DataName.WideHierarchy)
+        db.append(DataName.DeepHierarchy)
+        db.append(DataName.RebelliousHierarchy)
+        db.append(DataName.BrokenHierarchy)
+        db.append(DataName.MultipathHierarchy)
+        db.append(DataName.CyclicHierarchy)
+        db.append(DataName.RefusedBequest)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_designite_fowler_modularization_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.BrokenModularization)
+        db.append(DataName.InsufficientModularization)
+        db.append(DataName.Cyclic_DependentModularization)
+        db.append(DataName.Hub_likeModularization)
+        db.append(DataName.GodClass)
+        db.append(DataName.DataClass)
+        db.append(DataName.BrainClass)
+        db.append(DataName.AntiSingleton)
+        db.append(DataName.FeatureEnvy)
+        db.append(DataName.MessageChain)
+        db.append(DataName.DispersedCoupling)
+        db.append(DataName.IntensiveCoupling)
+        db.append(DataName.BrainMethod)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_designite_fowler_size_and_complexity_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.ImperativeAbstraction)
+        db.append(DataName.MultifacetedAbstraction)
+        db.append(DataName.UnnecessaryAbstraction)
+        db.append(DataName.UnutilizedAbstraction)
+        db.append(DataName.InsufficientModularization)
+        db.append(DataName.ComplexClass)
+        db.append(DataName.LazyClass)
+        db.append(DataName.SpaghettiCode)
+        db.append(DataName.LargeClass)
+        db.append(DataName.LongMethod_Organic)
+        db.append(DataName.LongParameterList_Organic)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_designite_fowler_coupling_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.DeficientEncapsulation)
+        db.append(DataName.UnexploitedEncapsulation)
+        db.append(DataName.BrokenModularization)
+        db.append(DataName.Cyclic_DependentModularization)
+        db.append(DataName.Hub_likeModularization)
+        db.append(DataName.GodClass)
+        db.append(DataName.ClassDataShouldBePrivate)
+        db.append(DataName.DataClass)
+        db.append(DataName.BrainClass)
+        db.append(DataName.SwissArmyKnife)
+        db.append(DataName.AntiSingleton)
+        db.append(DataName.FeatureEnvy)
+        db.append(DataName.MessageChain)
+        db.append(DataName.DispersedCoupling)
+        db.append(DataName.IntensiveCoupling)
+        db.append(DataName.ShotgunSurgery)
+        db.append(DataName.BrainMethod)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_designite_fowler_inheritance_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.MissingHierarchy)
+        db.append(DataName.WideHierarchy)
+        db.append(DataName.DeepHierarchy)
+        db.append(DataName.RebelliousHierarchy)
+        db.append(DataName.BrokenHierarchy)
+        db.append(DataName.MultipathHierarchy)
+        db.append(DataName.CyclicHierarchy)
+        db.append(DataName.RefusedBequest)
+        db.append(DataName.SpeculativeGenerality)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_fowler_size_and_complexity_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.ComplexClass)
+        db.append(DataName.LazyClass)
+        db.append(DataName.SpaghettiCode)
+        db.append(DataName.LargeClass)
+        db.append(DataName.LongMethod_Organic)
+        db.append(DataName.LongParameterList_Organic)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_fowler_coupling_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.GodClass)
+        db.append(DataName.ClassDataShouldBePrivate)
+        db.append(DataName.DataClass)
+        db.append(DataName.BrainClass)
+        db.append(DataName.SwissArmyKnife)
+        db.append(DataName.AntiSingleton)
+        db.append(DataName.FeatureEnvy)
+        db.append(DataName.MessageChain)
+        db.append(DataName.DispersedCoupling)
+        db.append(DataName.IntensiveCoupling)
+        db.append(DataName.ShotgunSurgery)
+        db.append(DataName.BrainMethod)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_fowler_inheritance_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.RefusedBequest)
+        db.append(DataName.SpeculativeGenerality)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_designite_size_and_complexity_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.ImperativeAbstraction)
+        db.append(DataName.MultifacetedAbstraction)
+        db.append(DataName.UnnecessaryAbstraction)
+        db.append(DataName.UnutilizedAbstraction)
+        db.append(DataName.InsufficientModularization)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_designite_coupling_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.DeficientEncapsulation)
+        db.append(DataName.UnexploitedEncapsulation)
+        db.append(DataName.BrokenModularization)
+        db.append(DataName.Cyclic_DependentModularization)
+        db.append(DataName.Hub_likeModularization)
+        db.append(DataName.Bugged)
+        return db
+
+    @staticmethod
+    def get_designite_inheritance_builder(project, version):
+        db = DataBuilder(project, version)
+        db.append(DataName.MissingHierarchy)
+        db.append(DataName.WideHierarchy)
+        db.append(DataName.DeepHierarchy)
+        db.append(DataName.RebelliousHierarchy)
+        db.append(DataName.BrokenHierarchy)
+        db.append(DataName.MultipathHierarchy)
+        db.append(DataName.CyclicHierarchy)
         db.append(DataName.Bugged)
         return db

@@ -1,0 +1,16 @@
+Smells,Score,Mean,Se
+Coupling,AUC ROC,0.672,0.01
+Coupling,Brier Score,0.242,0.011
+Coupling,F1 Score,0.296,0.019
+Coupling,Precision,0.228,0.019
+Coupling,Recall,0.573,0.022
+Inheritance,AUC ROC,0.671,0.01
+Inheritance,Brier Score,0.239,0.011
+Inheritance,F1 Score,0.297,0.02
+Inheritance,Precision,0.227,0.019
+Inheritance,Recall,0.568,0.022
+Size And Complexity,AUC ROC,0.67,0.01
+Size And Complexity,Brier Score,0.243,0.01
+Size And Complexity,F1 Score,0.294,0.019
+Size And Complexity,Precision,0.224,0.019
+Size And Complexity,Recall,0.571,0.022
