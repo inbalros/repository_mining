@@ -12,18 +12,10 @@ from config import Config
 from data_extractor import DataExtractor
 from metrics.rsc import source_monitor_xml
 from metrics.version_metrics_data import (
-    Data,
-    CompositeData, HalsteadData, CKData, SourceMonitorFilesData, SourceMonitorData, DesigniteDesignSmellsData,
-    DesigniteImplementationSmellsData, DesigniteOrganicTypeSmellsData, DesigniteOrganicMethodSmellsData,
-    DesigniteTypeMetricsData, DesigniteMethodMetricsData, CheckstyleData, BuggedData, BuggedMethodData)
+    Data,CompositeData, HalsteadData, CKData, SourceMonitorFilesData, SourceMonitorData, CheckstyleData, BuggedData, BuggedMethodData)
 from projects import Project
 from repo import Repo
 from .commented_code_detector import metrics_for_project
-from metrics.rsc.designite_smells import (
-    design_smells_list,
-    implementation_smells_list,
-    organic_type_smells_list,
-    organic_method_smells_list)
 from .java_analyser import JavaParserFileAnalyser
 
 
