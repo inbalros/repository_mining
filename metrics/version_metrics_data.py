@@ -97,6 +97,8 @@ class CompositeData(Data):
     def merge(self, merge_on, dfs):
         data = dict()
         df = dfs.pop(0)
+        print(df)
+        print(dfs)
         for ind, row in df.iterrows():
             d = row.to_dict()
             key = tuple(map(d.get, merge_on))
