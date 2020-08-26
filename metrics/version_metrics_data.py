@@ -135,6 +135,24 @@ class CompositeData(Data):
         classes_df = None
         methods_df = None
 
+        
+        if classes_dfs:
+            classes_df = classes_dfs.pop(0)
+            while classes_dfs:
+                classes_df = classes_df.merge(classes_dfs.pop(0), on=['File', 'Class'], how='outer')
+
+        if files_dfs:
+            classes_df = files_dfs.pop(0) if classes_df is None else classes_df
+            while files_dfs:
+                classes_df = classes_df.merge(files_dfs.pop(0), on=['File'], how='outer')
+
+        if methods_dfs:
+            methods_df = methods_dfs.pop(0)
+            while methods_dfs:
+                method_df = methods_dfs.pop(0)
+                methods_df = methods_df.merge(method_df, on=['File', 'Class', 'Method'], how='outer')
+        
+        '''
         if classes_dfs:
             classes_df = self.merge(['File', 'Class'], classes_dfs)
 
@@ -149,7 +167,7 @@ class CompositeData(Data):
                 method_df = methods_dfs.pop(0)
                 method_df = method_df.drop(["File", "Class", "Package", "Method"], axis=1, errors='ignore')
                 methods_df = methods_df.merge(method_df, on=['Method_ids'], how='outer')
-
+        '''
         return classes_df, methods_df
 
 
