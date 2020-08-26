@@ -99,9 +99,10 @@ class CompositeData(Data):
         df = dfs.pop(0)
         print(df)
         print(dfs)
-        while df == None and dfs:
+        while df is None and dfs:
             df = dfs.pop(0)
-        if df:
+        if df is not None:
+            print("no None")
             for ind, row in df.iterrows():
                 d = row.to_dict()
                 key = tuple(map(d.get, merge_on))
