@@ -97,16 +97,10 @@ class CompositeData(Data):
     def merge(self, merge_on, dfs):
         data = dict()
         df = dfs.pop(0)
-        print(df)
-        print(dfs)
-        while df is None and dfs:
-            df = dfs.pop(0)
-        if df is not None:
-            print("no None")
-            for ind, row in df.iterrows():
-                d = row.to_dict()
-                key = tuple(map(d.get, merge_on))
-                data[key] = d
+        for ind, row in df.iterrows():
+            d = row.to_dict()
+            key = tuple(map(d.get, merge_on))
+            data[key] = d
         while dfs:
             gc.collect()
             iter_df = dfs.pop(0)
@@ -145,6 +139,7 @@ class CompositeData(Data):
             classes_df = self.merge(['File', 'Class'], classes_dfs)
 
         if files_dfs:
+            classes_df = files_dfs.pop(0) if classes_df is None else classes_df
             classes_df = self.merge(['File'], [classes_df] + files_dfs)
 
         if methods_dfs:
