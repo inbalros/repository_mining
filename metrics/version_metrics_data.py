@@ -99,10 +99,13 @@ class CompositeData(Data):
         df = dfs.pop(0)
         print(df)
         print(dfs)
-        for ind, row in df.iterrows():
-            d = row.to_dict()
-            key = tuple(map(d.get, merge_on))
-            data[key] = d
+        while df == None and dfs:
+            df = dfs.pop(0)
+        if df:
+            for ind, row in df.iterrows():
+                d = row.to_dict()
+                key = tuple(map(d.get, merge_on))
+                data[key] = d
         while dfs:
             gc.collect()
             iter_df = dfs.pop(0)
