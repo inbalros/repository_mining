@@ -150,7 +150,8 @@ class CompositeData(Data):
             methods_df = methods_dfs.pop(0)
             while methods_dfs:
                 method_df = methods_dfs.pop(0)
-                methods_df = methods_df.merge(method_df, on=['File', 'Class', 'Method'], how='outer')
+                method_df = method_df.drop(["File", "Class", "Package", "Method"], axis=1, errors='ignore')
+                methods_df = methods_df.merge(method_df,on=['Method_ids'], how='outer')
         
         '''
         if classes_dfs:
